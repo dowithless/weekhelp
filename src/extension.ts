@@ -82,8 +82,9 @@ function setupPostCommitHook(dir: string) {
 // 创建 record-commit-msg.weekhelp.sh
 function createRecordCommitMsgScript(dir: string, weekhelpFolderPath: string) {
   // 将 src/record-commit-msg.template.sh 脚本写入到 record-commit-msg.weekhelp.sh 中
+  console.log("__dirname", __dirname);
   const recordCommitMsgScriptTemplate = fs.readFileSync(
-    path.join(__dirname, "..", "src", "record-commit-msg.template.sh"),
+    path.join(__dirname, "..", "record-commit-msg.template.sh"),
     "utf8"
   );
 
@@ -165,6 +166,7 @@ export function activate(context: vscode.ExtensionContext) {
   if (!fs.existsSync(globalStorageUri.fsPath)) {
     fs.mkdirSync(globalStorageUri.fsPath);
   }
+  console.log("globalStorageUri.fsPath created:", globalStorageUri.fsPath);
 
   prepareCurrentWeekFile(globalStorageUri.fsPath);
 
