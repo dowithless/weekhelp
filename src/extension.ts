@@ -10,7 +10,7 @@ import advancedFormat from "dayjs/plugin/advancedFormat";
 dayjs.extend(weekOfYear);
 dayjs.extend(advancedFormat);
 
-const RECORD_COMMIT_MSG_SCRIPT_FILE_NAME = "record-commit-msg.sh";
+const RECORD_COMMIT_MSG_SCRIPT_FILE_NAME = "record-commit-msg.weekhelp.sh";
 const RECORD_COMMIT_MSG_SCRIPT_FILE_FULL_PATH = `.git/hooks/${RECORD_COMMIT_MSG_SCRIPT_FILE_NAME}`;
 const POST_COMMIT_FULL_PATH = ".git/hooks/post-commit";
 
@@ -93,14 +93,35 @@ function createRecordCommitMsgScript(dir: string, weekhelpFolderPath: string) {
     `WEEKHELP_FOLDER_PATH="${weekhelpFolderPath}"`
   );
 
-  fs.writeFileSync(
-    path.join(dir, RECORD_COMMIT_MSG_SCRIPT_FILE_FULL_PATH),
-    recordCommitMsgScript
+  const scriptFileFullPath = path.join(
+    dir,
+    RECORD_COMMIT_MSG_SCRIPT_FILE_FULL_PATH
   );
+  fs.writeFileSync(scriptFileFullPath, recordCommitMsgScript);
+
+  // 确保有执行权限
+  fs.chmod(scriptFileFullPath, 0o755, (err) => {
+    if (err) {
+      console.error(`无法设置执行权限: ${err}`);
+    } else {
+      console.log(`'${scriptFileFullPath}' 的执行权限已设置`);
+    }
+  });
 }
 
 function createPostCommit(dir: string) {
-  fs.writeFileSync(path.join(dir, POST_COMMIT_FULL_PATH), `#!/bin/sh\n\n`);
+  const filePath = path.join(dir, POST_COMMIT_FULL_PATH);
+
+  fs.writeFileSync(filePath, `#!/bin/sh\n\n`);
+
+  // 确保有执行权限
+  fs.chmod(filePath, 0o755, (err) => {
+    if (err) {
+      console.error(`无法设置执行权限: ${err}`);
+    } else {
+      console.log(`'${filePath}' 的执行权限已设置`);
+    }
+  });
 }
 
 function workspaceFolderChange(weekhelpFolderPath: string) {
