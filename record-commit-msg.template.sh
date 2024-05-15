@@ -2,7 +2,7 @@
 # post-commit hook to write the project name and the commit msg to weekhelp.md
 
 # 系统类型：linux, macos, windows, unknown
-declare -g SYS_TYPE
+declare SYS_TYPE
 
 # weekhelp 的目录
 # 需要填充为：context.globalStorageUri.fsPath
@@ -41,9 +41,9 @@ if [ ! -d "$dirpath" ]; then
 fi
 
 # Check if the file exists, if not, create it
-if [ ! -f $filepath ]; then
+if [ ! -f "$filepath" ]; then
     echo "File not found, creating $filepath"
-    touch $filepath
+    touch "$filepath"
 fi
 
 # Get the commit message
@@ -54,7 +54,7 @@ project_name=$(basename $(git rev-parse --show-toplevel))
 
 # mac: awk 'FNR>2 && $1="" {print FNR; exit}' 20.md
 # linux: awk 'FNR>2 && $1 == "" {print FNR; exit}' 01.md
-# 查找空白行
+# 输出空行的行号或者如果不存在空行则输出下一行的行号。
 function find_blank_line {
     local file=$1
     local start_line=$2
@@ -63,18 +63,9 @@ function find_blank_line {
 
     if [[ "$SYS_TYPE" == "macos" ]]; then
         # 在这里添加适用于 macos 的命令：
-        awk -v start_line="$start_line" 'FNR>start_line && $1="" {print FNR; exit}' "$file"
-    elif [[ "$SYS_TYPE" == "linux" ]]; then
-        # 在这里添加适用于 Linux 的命令：
-        awk -v start_line="$start_line" 'FNR>start_line && $1=="" {print FNR; exit}' "$file"
-    elif [[ "$SYS_TYPE" == "windows" ]]; then
-        # 在这里添加适用于 Windows 的命令：
-        # awk -v start_line="$start_line" 'FNR>start_line && $1=="" {print FNR; exit}' "$file"
-        # awk -v start_line="$start_line" '{if(FNR>start_line && $1=="") {print FNR; found=1; exit}} END{if(!found) print FNR}' "$file"
-        awk -v start_line="$start_line" '{if(FNR>start_line && $1=="") {print FNR; found=1; exit}} END{if(!found) print FNR+1}' "$file"
+        awk -v startLine="$start_line" '{if (FNR > startLine && $1 == "") {print FNR; found=1; exit}} END{if (!found) print FNR+1}' "$file"
     else
-        echo "Unknown system type: $SYS_TYPE"
-        exit 1
+        awk -v start_line="$start_line" '{if(FNR>start_line && $1=="") {print FNR; found=1; exit}} END{if(!found) print FNR+1}' "$file"
     fi
 }
 
@@ -83,14 +74,23 @@ function insert_before_blank_line {
     local blank_line_number=$2
     local text=$3
 
-    # echo "insert_before_blank_line: $filepath $blank_line_number $text "
-
     # 在空白行前插入新的内容
-    # sed -i "$((blank_line_number-1))a\$text" "$filepath"
-    # sed -i "$((blank_line_number-1))a\\$text" "$filepath"
-    #  如果text中包含/等特殊字符，如何额外处理，避免sed命令出错。
+    # 如果text中包含/等特殊字符，如何额外处理，避免sed命令出错。
     text_quoted=$(printf '%q' "- $text")
-    sed -i "$((blank_line_number-1))a\\$text_quoted" "$filepath"
+    echo "$text_quoted"
+    echo "$filepath" 
+    echo "$blank_line_number" 
+    echo "$((blank_line_number-1))"
+
+    if [[ "$SYS_TYPE" == "macos" ]]; then
+        # 第二行的内容会原样插入文件中，前面不可以有空格
+        sed -i '' -e "$((blank_line_number-1))a\\
+${text_quoted}" "$filepath"
+        
+    else
+        sed -i "$((blank_line_number-1))a\\$text_quoted" "$filepath"
+    fi
+
 }
 
 if grep -q "## $project_name" "$filepath"; then
@@ -100,11 +100,11 @@ if grep -q "## $project_name" "$filepath"; then
     # echo "查找：## $project_name 在文件 $filepath"
     # 项目名的行号
     title_line_number=$(grep -n -m 1 -w -F "## $project_name" "$filepath" | cut -d ":" -f 1)
-    # echo "title_line_number: $title_line_number"
+    echo "title_line_number: $title_line_number"
 
     # 找到第一个空白行
     blank_line_number=$(find_blank_line "$filepath" "$((title_line_number+1))")
-    # echo "blank_line_number: $blank_line_number"
+    echo "blank_line_number: $blank_line_number"
 
     # 在空白行后插入新的内容
     # sed -i "${blank_line_number}a\## $project_name" "$filepath"
