@@ -3,6 +3,8 @@
   "displayName": "Week Help",
   "description": "简单的周报助手",
   "version": "0.0.1",
+  "repository": "https://github.com/dowithless/weekhelp",
+  "publisher": "dowithless",
   "engines": {
     "vscode": "^1.89.0"
   },
