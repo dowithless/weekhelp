@@ -2,7 +2,7 @@
   "name": "weekhelp",
   "displayName": "Week Help",
   "description": "简单的周报助手",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "repository": "https://github.com/dowithless/weekhelp",
   "publisher": "dowithless",
   "engines": {

@@ -21,6 +21,14 @@ mvp: 自测在 windows 系统，使用 git bash 可正常工作。
 
 MacOS 暂不兼容
 
+### 0.0.2
+
+修复了打包后找不到模版文件的问题
+
+### 0.0.3
+
+MacOS 可以用了
+
 ---
 
 ## For more information
