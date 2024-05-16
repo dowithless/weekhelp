@@ -18,11 +18,11 @@
   "contributes": {
     "commands": [
       {
-        "command": "weekhelp.openFolder",
+        "command": "weekhelp.openWeekhelpFolder",
         "title": "Open Weekhelp Folder"
       },
       {
-        "command": "weekhelp.openFile",
+        "command": "weekhelp.openWeekhelpFile",
         "title": "Open Weekhelp File"
       }
     ],

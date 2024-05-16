@@ -7,6 +7,10 @@ import dayjs from "dayjs";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 
+import { getCurrentWeekFileName } from "./lib/index";
+import { registerOpenWeekhelpFileCommand } from "./command/open-weekhelp-file";
+import { registerOpenWeekhelpFolderCommand } from "./command/open-weekhelp-folder";
+
 dayjs.extend(weekOfYear);
 dayjs.extend(advancedFormat);
 
@@ -14,18 +18,10 @@ const RECORD_COMMIT_MSG_SCRIPT_FILE_NAME = "record-commit-msg.weekhelp.sh";
 const RECORD_COMMIT_MSG_SCRIPT_FILE_FULL_PATH = `.git/hooks/${RECORD_COMMIT_MSG_SCRIPT_FILE_NAME}`;
 const POST_COMMIT_FULL_PATH = ".git/hooks/post-commit";
 
-// YYYY-ww.md
-// eg: 2024-05.md
-function getCurrentFileName() {
-  const name = dayjs().format("YYYY-ww");
-
-  return `${name}.md`;
-}
-
 // 准备当周的文件 YYYY-ww.md
-function prepareCurrentWeekFile(folder: string) {
-  const filename = getCurrentFileName();
-  const filepath = path.join(folder, filename);
+function initCurrentWeekFile(folderPath: string) {
+  const filename = getCurrentWeekFileName();
+  const filepath = path.join(folderPath, filename);
 
   if (!fs.existsSync(filepath)) {
     const start = dayjs().startOf("week").format("YYYY.MM.DD");
@@ -110,7 +106,7 @@ function createRecordCommitMsgScript(dir: string, weekhelpFolderPath: string) {
   });
 }
 
-function createPostCommit(dir: string) {
+function initPostCommitHook(dir: string) {
   const filePath = path.join(dir, POST_COMMIT_FULL_PATH);
 
   fs.writeFileSync(filePath, `#!/bin/sh\n\n`);
@@ -134,7 +130,6 @@ function workspaceFolderChange(weekhelpFolderPath: string) {
 
   workspaceFolders.forEach((folder) => {
     const dir = folder.uri.fsPath;
-    console.log("dir", dir);
 
     // 不是一个git仓库
     if (!isGitRepository(dir)) {
@@ -144,7 +139,7 @@ function workspaceFolderChange(weekhelpFolderPath: string) {
 
     // 没有 post-commit，就创建一个
     if (!isExistsPostCommit(dir)) {
-      createPostCommit(dir);
+      initPostCommitHook(dir);
     }
 
     // 没有 record-commit-msg.sh 就创建一个
@@ -157,58 +152,42 @@ function workspaceFolderChange(weekhelpFolderPath: string) {
   });
 }
 
-export function activate(context: vscode.ExtensionContext) {
+function initWeekhelpFolder(context: vscode.ExtensionContext) {
   const globalStorageUri = context.globalStorageUri;
-
-  console.log("globalStoragePath", globalStorageUri.fsPath);
 
   // 创建全局目录
   if (!fs.existsSync(globalStorageUri.fsPath)) {
     fs.mkdirSync(globalStorageUri.fsPath);
   }
-  console.log("globalStorageUri.fsPath created:", globalStorageUri.fsPath);
+  console.log("weekhelp folder created:", globalStorageUri.fsPath);
+}
 
-  prepareCurrentWeekFile(globalStorageUri.fsPath);
+function getWeekhelpFolderPath(context: vscode.ExtensionContext) {
+  const globalStorageUri = context.globalStorageUri;
 
-  vscode.workspace.onDidChangeWorkspaceFolders(() =>
-    workspaceFolderChange(globalStorageUri.fsPath)
-  );
+  return globalStorageUri.fsPath;
+}
 
-  // At activation, execute once.
-  workspaceFolderChange(globalStorageUri.fsPath);
+// 插件被激活时执行这个方法
+export function activate(context: vscode.ExtensionContext) {
+  const weekhelpFolderPath = getWeekhelpFolderPath(context);
 
-  // 打开文件夹
-  let openFolderDisposable = vscode.commands.registerCommand(
-    "weekhelp.openFolder",
-    () => {
-      vscode.commands.executeCommand(
-        "vscode.openFolder",
-        context.globalStorageUri,
-        true
-      );
-    }
-  );
+  // 注册命令
+  registerOpenWeekhelpFolderCommand(context);
+  registerOpenWeekhelpFileCommand(context);
 
-  context.subscriptions.push(openFolderDisposable);
+  // 创建全局目录
+  initWeekhelpFolder(context);
 
-  // 打开文件
-  let openFileDisposable = vscode.commands.registerCommand(
-    "weekhelp.openFile",
-    () => {
-      const filename = getCurrentFileName();
-      console.log("filename", filename);
+  // 初始化本周的文件
+  initCurrentWeekFile(weekhelpFolderPath);
 
-      const openPath = vscode.Uri.file(
-        path.join(context.globalStorageUri.fsPath, filename)
-      );
+  vscode.workspace.onDidChangeWorkspaceFolders(() => {
+    workspaceFolderChange(weekhelpFolderPath);
+  });
 
-      vscode.workspace.openTextDocument(openPath).then((doc) => {
-        vscode.window.showTextDocument(doc);
-      });
-    }
-  );
-
-  context.subscriptions.push(openFileDisposable);
+  // 插件被激活时，执行一次.
+  workspaceFolderChange(weekhelpFolderPath);
 }
 
 // This method is called when your extension is deactivated
