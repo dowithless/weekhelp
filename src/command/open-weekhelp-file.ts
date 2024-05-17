@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
-import * as path from "path";
-import { getCurrentWeekFileName } from "../lib";
+import { Weekhelp } from "../class/weekhelp";
 
 const command = "weekhelp.openWeekhelpFile";
 
@@ -10,15 +9,8 @@ export function registerOpenWeekhelpFileCommand(
   context: vscode.ExtensionContext
 ) {
   const disposable = vscode.commands.registerCommand(command, () => {
-    const filename = getCurrentWeekFileName();
-
-    const openPath = vscode.Uri.file(
-      path.join(context.globalStorageUri.fsPath, filename)
-    );
-
-    vscode.workspace.openTextDocument(openPath).then((doc) => {
-      vscode.window.showTextDocument(doc);
-    });
+    const wh = new Weekhelp(context);
+    wh.openCurrentWeekFile();
   });
 
   context.subscriptions.push(disposable);
