@@ -5,9 +5,7 @@ const command = "weekhelp.openWeekhelpFile";
 
 // 打开文件
 
-export function registerOpenWeekhelpFileCommand(
-  context: vscode.ExtensionContext
-) {
+export function openWeekhelpFile(context: vscode.ExtensionContext) {
   const disposable = vscode.commands.registerCommand(command, () => {
     const wh = new Weekhelp(context);
     wh.openCurrentWeekFile();

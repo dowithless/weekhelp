@@ -5,8 +5,8 @@ import dayjs from "dayjs";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 
-import { registerOpenWeekhelpFileCommand } from "./command/open-weekhelp-file";
-import { registerOpenWeekhelpFolderCommand } from "./command/open-weekhelp-folder";
+import { openWeekhelpFile as registerOpenWeekhelpFileCommand } from "./command/open-weekhelp-file";
+import { openWeekhelpFolder as registerOpenWeekhelpFolderCommand } from "./command/open-weekhelp-folder";
 import { setWeekhelpFolder as registerSetWeekhelpFolderCommand } from "./command/set-weekhelp-folder";
 import { onDidChangeConfiguration } from "./event/on-did-change-configuration";
 
@@ -46,8 +46,8 @@ export function activate(context: vscode.ExtensionContext) {
     onDidChangeConfiguration(context);
 
     // 注册命令
-    registerOpenWeekhelpFolderCommand(context);
     registerOpenWeekhelpFileCommand(context);
+    registerOpenWeekhelpFolderCommand(context);
     registerSetWeekhelpFolderCommand(context);
 
     wh.createWeekhelpFolder();
