@@ -7,6 +7,8 @@ import advancedFormat from "dayjs/plugin/advancedFormat";
 
 import { registerOpenWeekhelpFileCommand } from "./command/open-weekhelp-file";
 import { registerOpenWeekhelpFolderCommand } from "./command/open-weekhelp-folder";
+import { setWeekhelpFolder as registerSetWeekhelpFolderCommand } from "./command/set-weekhelp-folder";
+import { onDidChangeConfiguration } from "./event/on-did-change-configuration";
 
 import { Weekhelp } from "./class/weekhelp";
 
@@ -40,9 +42,13 @@ export function activate(context: vscode.ExtensionContext) {
   try {
     const wh = new Weekhelp(context);
 
+    // 监听配置的修改
+    onDidChangeConfiguration(context);
+
     // 注册命令
     registerOpenWeekhelpFolderCommand(context);
     registerOpenWeekhelpFileCommand(context);
+    registerSetWeekhelpFolderCommand(context);
 
     wh.createWeekhelpFolder();
 
@@ -50,6 +56,8 @@ export function activate(context: vscode.ExtensionContext) {
     // initCurrentWeekFile(weekhelpFolderPath);
     wh.createCurrentWeekFile();
 
+    // 切换了文件夹时，检查文件夹是否是 git 仓库
+    // 如果是，要进行初始化工作
     vscode.workspace.onDidChangeWorkspaceFolders(() => {
       workspaceFolderChange(context);
     });

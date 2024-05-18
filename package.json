@@ -19,22 +19,26 @@
   "contributes": {
     "commands": [
       {
+        "command": "weekhelp.openWeekhelpFile",
+        "title": "Weekhelp: Open Weekhelp File"
+      },
+      {
         "command": "weekhelp.openWeekhelpFolder",
         "title": "Weekhelp: Open Weekhelp Folder"
       },
       {
-        "command": "weekhelp.openWeekhelpFile",
-        "title": "Weekhelp: Open Weekhelp File"
+        "command": "weekhelp.setWeekhelpFolder",
+        "title": "Weekhelp: Set Weekhelp Folder"
       }
     ],
     "configuration": {
       "type": "object",
-      "title": "Week Help",
+      "title": "Weekhelp",
       "properties": {
         "weekhelp.folderPath": {
           "type": "string",
           "default": "",
-          "description": "The weekhelp folder path."
+          "description": "用于存放周报文件的文件夹"
         }
       }
     }

@@ -110,8 +110,6 @@ export class Weekhelp {
     workspaceFolder: string,
     weekhelpFolderPath: string
   ) {
-    console.log("__dirname", __dirname);
-
     // 读取记录脚本模板文件的内容
     const templateFile = fs.readFileSync(
       path.join(__dirname, "../../", RECORD_SCRIPT_TEMPLATE_FILE_NAME),
@@ -170,6 +168,55 @@ export class Weekhelp {
   }
 
   /**
+   * 将指定路径下的周文件移动到新路径下。
+   * 此函数会遍历旧路径下的所有文件，找到符合命名规则（YYYY-MM.md）的文件，并将其移动到新路径下。
+   *
+   * @param oldPath 旧路径，文件将从此路径下被移动。
+   * @param newPath 新路径，文件将被移动到此路径下。
+   */
+  static moveWeekFiles(oldPath: string, newPath: string) {
+    // 读取旧路径下的所有文件
+    const files = fs.readdirSync(oldPath);
+
+    for (const file of files) {
+      // 检查文件名是否符合要求
+      if (/^\d{4}-\d{2}\.md$/.test(file)) {
+        const oldFilePath = path.join(oldPath, file); // 拼接旧文件路径
+        const newFilePath = path.join(newPath, file); // 拼接新文件路径
+
+        // 使用 renameSync 方法移动文件
+        fs.renameSync(oldFilePath, newFilePath);
+      }
+    }
+  }
+
+  /**
+   * 修改了文件夹路径的回调
+   * 检查目标位置是否存在，如果不存在，给出提示
+   * 如果存在，将原来位置下的内容拷贝至新位置
+   * 然后给出提示
+   */
+  updateWeekhelpFolderPath(oldPath: string, newPath: string) {
+    try {
+      // 如果目标目录不存在，提示用户
+      if (!fs.existsSync(newPath)) {
+        vscode.window.showErrorMessage(`Weekhelp: 目标目录不存在 ${newPath}`);
+        return;
+      }
+
+      Weekhelp.moveWeekFiles(oldPath, newPath);
+
+      vscode.window.showInformationMessage("Weekhelp: 工作目录已更新");
+    } catch (error: any) {
+      console.error(error);
+      vscode.window.showErrorMessage(
+        error.message ??
+          `Weekhelp: 更新目录失败, oldPath: ${oldPath}, newPath: ${newPath}`
+      );
+    }
+  }
+
+  /**
    * 获取Weekhelp文件夹的路径。
    *
    * @function getWeekhelpFolderPath
@@ -177,26 +224,16 @@ export class Weekhelp {
    * @returns {string} 返回Weekhelp文件夹在文件系统上的绝对路径。
    */
   getWeekhelpFolderPath(): string {
-    // weekhelp 文件夹路径默认使用 vscode 提供的 globalStorageUri
-    // todo: 后续可以读取用户的设置
-    const weekhelpFolderPath = this.vsContext.globalStorageUri.fsPath;
+    // 配置的路径
+    const configedPath = vscode.workspace
+      .getConfiguration("weekhelp")
+      .get("folderPath") as string;
 
-    return weekhelpFolderPath;
-  }
+    if (configedPath && fs.existsSync(configedPath)) {
+      return configedPath;
+    }
 
-  /**
-   * 设置Weekhelp文件夹的路径。
-   *
-   * @function setWeekhelpFolderPath
-   * @memberof this
-   * @param {string} weekhelpFolderPath - 要设置的Weekhelp文件夹路径。
-   */
-  setWeekhelpFolderPath(weekhelpFolderPath: string) {
-    // 提示用户
-    vscode.window.showInformationMessage("还没有实现这个功能");
-
-    // 更新 record 脚本
-    // 如何更新？什么时候更新？其他项目如何处理？
+    return this.vsContext.globalStorageUri.fsPath;
   }
 
   /**
