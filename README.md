@@ -45,6 +45,16 @@ date:
 - windows 系统：在 vscode 中使用快捷键 `ctrl+shift+p` 唤出命令面板
 - Mac 系统：在 vscode 中使用快捷键 `command+shift+p` 唤出命令面板
 
-2. 输入 weekhelp 即可查看插件全部可用命令（目前只有两个）
+2. 输入 weekhelp 即可查看插件全部可用命令（目前只有 3 个）
+
+### 如何自定义<周报>文件的存放位置?
+
+两种方式：
+
+方式一(推荐)：使用命令 `Set Weekhelp Folder`
+![设置文件夹](images/set-folder-1.png)
+
+方式二：在 vscode 的设置中，搜索 weekhelp，找到 weekhelp.folder Path，修改为目标文件夹的路径即可。
+![设置文件夹](images/set-folder-2.png)
 
 **Enjoy! ☕️**

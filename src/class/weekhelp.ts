@@ -191,23 +191,33 @@ export class Weekhelp {
   }
 
   /**
-   * 修改了文件夹路径的回调
-   * 检查目标位置是否存在，如果不存在，给出提示
-   * 如果存在，将原来位置下的内容拷贝至新位置
-   * 然后给出提示
+   * 更新 Weekhelp 的工作目录路径。
+   * 该函数首先检查新路径是否存在，如果不存在则显示错误消息。
+   * 如果新路径存在，它将移动 Weekhelp 文件到新路径，并显示一个成功消息。
+   * 如果过程中发生错误，将显示错误消息。
+   * @param oldPath 旧的工作目录路径。
+   * @param newPath 新的工作目录路径。如果未提供，则使用全局存储路径。
    */
   updateWeekhelpFolderPath(oldPath: string, newPath: string) {
     try {
-      // 如果目标目录不存在，提示用户
+      // 如果未指定新路径，则使用全局存储路径
+      if (!newPath) {
+        newPath = this.vsContext.globalStorageUri.fsPath;
+      }
+
+      // 检查新路径是否存在
       if (!fs.existsSync(newPath)) {
         vscode.window.showErrorMessage(`Weekhelp: 目标目录不存在 ${newPath}`);
         return;
       }
 
+      // 移动 Weekhelp 文件到新路径
       Weekhelp.moveWeekFiles(oldPath, newPath);
 
+      // 显示工作目录已更新的信息
       vscode.window.showInformationMessage("Weekhelp: 工作目录已更新");
     } catch (error: any) {
+      // 输出错误到控制台并显示错误消息
       console.error(error);
       vscode.window.showErrorMessage(
         error.message ??
