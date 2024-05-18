@@ -1,36 +1,50 @@
-# weekhelp README
+# Weekhelp
 
-这是一个 VsCode 插件，一个简单的周报助手，专为开发者设计。
+这是一个 VSCode 插件，专为开发者设计，开源、离线、免费的周报助手。
 
-## Features
+它能够自动收集 git commit 的提交信息，按照项目进行分类，存储到以当前周命名的 Markdown 文件中。
 
-1 个被动技能：自动收集 git commit 的提交信息，存储到以当前周命名的 Markdown 文件中。
+如：2024-20.md
+
+```md
+---
+date:
+  - 2024.05.13 - 2024.05.19
+---
+
+## example_project_1
+
+- 初始化项目
+- 添加登录功能
+- 修复登录功能中的错误
+- 增加用户注册功能
+- 优化用户界面设计
+
+## example_project_2
+
+- 修复了登录页面的布局问题
+- 在用户管理页面增加了搜索功能
+- 对购物车页面进行了性能优化
+```
+
+## 技能
+
+1 个被动技能：当用户进行 git commit 时，它会自动收集提交信息，并按项目分类，存储到以当前周命名的 Markdown 文件中。
 
 2 个主动技能：
 
-- Open Weekhelp File 查看/编辑 当前周的 Markdown 文件
-- Open Weekhelp Folder 打开 weekhelp 文件夹，这是存储全部 Markdown 文件的的文件夹。
+- 命令：Open Weekhelp File 打开当前周的 Markdown 文件。
+- 命令：Open Weekhelp Folder： 打开 weekhelp 文件夹，这是存储全部 Markdown 文件的位置。
 
-## Release Notes
+## 常见问题
 
-Users appreciate release notes as you update your extension.
+### 如何查看<周报>文件/文件夹?
 
-### 0.0.1
+1. 唤出命令面板
 
-mvp: 自测在 windows 系统，使用 git bash 可正常工作。
+- windows 系统：在 vscode 中使用快捷键 `ctrl+shift+p` 唤出命令面板
+- Mac 系统：在 vscode 中使用快捷键 `command+shift+p` 唤出命令面板
 
-MacOS 暂不兼容
+2. 输入 weekhelp 即可查看插件全部可用命令（目前只有两个）
 
-### 0.0.2
-
-修复了打包后找不到模版文件的问题
-
-### 0.0.3
-
-MacOS 可以用了
-
----
-
-## For more information
-
-**Enjoy!**
+**Enjoy! ☕️**

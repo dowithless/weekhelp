@@ -1,8 +1,8 @@
 {
   "name": "weekhelp",
-  "displayName": "Week Help",
-  "description": "自动收集 git 提交信息，为写周报提供素材。",
-  "version": "0.0.4",
+  "displayName": "Weekhelp",
+  "description": "自动收集整理 git 提交信息，为写周报提供素材。",
+  "version": "0.0.5",
   "repository": "https://github.com/dowithless/weekhelp",
   "publisher": "dowithless",
   "icon": "icon.png",
@@ -20,11 +20,11 @@
     "commands": [
       {
         "command": "weekhelp.openWeekhelpFolder",
-        "title": "Open Weekhelp Folder"
+        "title": "Weekhelp: Open Weekhelp Folder"
       },
       {
         "command": "weekhelp.openWeekhelpFile",
-        "title": "Open Weekhelp File"
+        "title": "Weekhelp: Open Weekhelp File"
       }
     ],
     "configuration": {

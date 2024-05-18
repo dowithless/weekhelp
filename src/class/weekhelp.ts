@@ -2,11 +2,11 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
 import dayjs from "dayjs";
-import weekOfYear from "dayjs/plugin/weekOfYear";
 import advancedFormat from "dayjs/plugin/advancedFormat";
+import isoWeek from "dayjs/plugin/isoWeek";
 
-dayjs.extend(weekOfYear);
 dayjs.extend(advancedFormat);
+dayjs.extend(isoWeek);
 
 const RECORD_SCRIPT_FILE_NAME = "record.weekhelp.sh";
 const RECORD_SCRIPT_TEMPLATE_FILE_NAME = `${RECORD_SCRIPT_FILE_NAME}.template`;
@@ -73,7 +73,7 @@ export class Weekhelp {
 
     // 检查脚本内容中是否包含调用记录脚本的语句
     const isExistCallStatement = postCommit.includes(
-      `sh ${RECORD_SCRIPT_FILE_NAME}`
+      `${RECORD_SCRIPT_FILE_NAME}`
     );
 
     return isExistCallStatement;
@@ -133,6 +133,15 @@ export class Weekhelp {
     // 将内容写入文件，并设置文件权限
     fs.writeFileSync(filePath, fileContent);
     fs.chmodSync(filePath, 0o755); // 设置文件为可执行权限
+  }
+
+  static deleteRecordScriptFile(workspaceFolder: string) {
+    const filePath = path.join(
+      workspaceFolder,
+      RECORD_SCRIPT_FILE_RELATIVE_PATH
+    );
+
+    fs.unlinkSync(filePath);
   }
 
   /**
@@ -214,7 +223,8 @@ export class Weekhelp {
    */
   getCurrentWeekFileName() {
     // 使用dayjs获取当前时间，并格式化为"年份-周数"的形式
-    const name = dayjs().format("YYYY-ww");
+    // WW: ISO 周数
+    const name = dayjs().format("YYYY-WW");
 
     // 返回格式化后的周数文件名，添加.md后缀
     return `${name}.md`;
@@ -240,8 +250,8 @@ export class Weekhelp {
     // 检查文件是否存在，若不存在则创建
     if (!fs.existsSync(filePath)) {
       // 获取当前周的开始和结束日期
-      const start = dayjs().startOf("week").format("YYYY.MM.DD");
-      const end = dayjs().endOf("week").format("YYYY.MM.DD");
+      const start = dayjs().startOf("isoWeek").format("YYYY.MM.DD");
+      const end = dayjs().endOf("isoWeek").format("YYYY.MM.DD");
 
       // 创建并写入文件，包含markdown的YAML front matter
       fs.writeFileSync(
@@ -293,5 +303,29 @@ date:
       vscode.Uri.file(weekhelpFolderPath),
       true
     );
+  }
+
+  setupWorkspaceFolder(folderPath: string) {
+    // 不是一个git仓库
+    if (!Weekhelp.isGitRepositoryFolder(folderPath)) {
+      console.log(`${folderPath} is not a git repository`);
+      return;
+    }
+
+    // 没有 post-commit，就创建一个
+    if (!Weekhelp.isExistPostCommitFile(folderPath)) {
+      Weekhelp.createPostCommitFile(folderPath);
+    }
+
+    // 在post-commit 中调用 record 脚本
+    if (!Weekhelp.isPostCommitIncludeRecordScript(folderPath)) {
+      Weekhelp.appendRecordScriptToPostCommit(folderPath);
+    }
+
+    // 保持更新
+    if (Weekhelp.isExistRecordScriptFile(folderPath)) {
+      Weekhelp.deleteRecordScriptFile(folderPath);
+    }
+    Weekhelp.createRecordScriptFile(folderPath, this.getWeekhelpFolderPath());
   }
 }

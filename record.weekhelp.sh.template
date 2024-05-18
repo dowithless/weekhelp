@@ -69,7 +69,7 @@ function find_blank_line {
     fi
 }
 
-function insert_before_blank_line { 
+function insert_before_blank_line {
     local filepath=$1
     local blank_line_number=$2
     local text=$3
@@ -78,17 +78,17 @@ function insert_before_blank_line {
     # 如果text中包含/等特殊字符，如何额外处理，避免sed命令出错。
     text_quoted=$(printf '%q' "- $text")
     # echo "$text_quoted"
-    # echo "$filepath" 
-    # echo "$blank_line_number" 
+    # echo "$filepath"
+    # echo "$blank_line_number"
     # echo "$((blank_line_number-1))"
 
     if [[ "$SYS_TYPE" == "macos" ]]; then
         # 第二行的内容会原样插入文件中，前面不可以有空格
-        sed -i '' -e "$((blank_line_number-1))a\\
+        sed -i '' -e "$((blank_line_number - 1))a\\
 ${text_quoted}" "$filepath"
-        
+
     else
-        sed -i "$((blank_line_number-1))a\\$text_quoted" "$filepath"
+        sed -i "$((blank_line_number - 1))a\\$text_quoted" "$filepath"
     fi
 
 }
@@ -103,7 +103,7 @@ if grep -q "## $project_name" "$filepath"; then
     # echo "title_line_number: $title_line_number"
 
     # 找到第一个空白行
-    blank_line_number=$(find_blank_line "$filepath" "$((title_line_number+1))")
+    blank_line_number=$(find_blank_line "$filepath" "$((title_line_number + 1))")
     # echo "blank_line_number: $blank_line_number"
 
     # 在空白行后插入新的内容
@@ -114,21 +114,20 @@ if grep -q "## $project_name" "$filepath"; then
 else
     # echo "$project_name 不存在提交记录"
 
-     # 插入空白行
-    echo "" >>$filepath
+    # 插入空白行
+    echo "" >>"$filepath"
 
     # 第一个项目的标题
-    echo "## ${project_name}" >>$filepath
+    echo "## ${project_name}" >>"$filepath"
 
     # 插入空白行
-    echo "" >>$filepath
+    echo "" >>"$filepath"
 
     # 第一个项目的第一个commit
-    echo "- ${commit_msg}" >>$filepath
+    echo "- ${commit_msg}" >>"$filepath"
 
     # 插入空白行
     # echo "" >>$filepath
 
     echo "提交信息保存到文件：$filepath"
 fi
-

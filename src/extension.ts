@@ -23,50 +23,46 @@ function workspaceFolderChange(context: vscode.ExtensionContext) {
   const wh = new Weekhelp(context);
 
   workspaceFolders.forEach((folder) => {
-    const folderPath = folder.uri.fsPath;
+    try {
+      const folderPath = folder.uri.fsPath;
+      wh.setupWorkspaceFolder(folderPath);
+    } catch (error) {
+      console.error(error);
 
-    // 不是一个git仓库
-    if (!Weekhelp.isGitRepositoryFolder(folderPath)) {
-      console.log(`${folderPath} is not a git repository`);
-      return;
-    }
-
-    // 没有 post-commit，就创建一个
-    if (!Weekhelp.isExistPostCommitFile(folderPath)) {
-      Weekhelp.createPostCommitFile(folderPath);
-    }
-
-    // 没有 record-commit-msg.sh 就创建一个
-    if (!Weekhelp.isExistRecordScriptFile(folderPath)) {
-      Weekhelp.createRecordScriptFile(folderPath, wh.getWeekhelpFolderPath());
-    }
-
-    if (!Weekhelp.isPostCommitIncludeRecordScript(folderPath)) {
-      Weekhelp.appendRecordScriptToPostCommit(folderPath);
+      // vscode 提示
+      vscode.window.showErrorMessage(`Weekhelp: ${folder.name} 初始化失败`);
     }
   });
 }
 
 // 插件被激活时执行这个方法
 export function activate(context: vscode.ExtensionContext) {
-  const wh = new Weekhelp(context);
+  try {
+    const wh = new Weekhelp(context);
 
-  // 注册命令
-  registerOpenWeekhelpFolderCommand(context);
-  registerOpenWeekhelpFileCommand(context);
+    // 注册命令
+    registerOpenWeekhelpFolderCommand(context);
+    registerOpenWeekhelpFileCommand(context);
 
-  wh.createWeekhelpFolder();
+    wh.createWeekhelpFolder();
 
-  // 初始化本周的文件
-  // initCurrentWeekFile(weekhelpFolderPath);
-  wh.createCurrentWeekFile();
+    // 初始化本周的文件
+    // initCurrentWeekFile(weekhelpFolderPath);
+    wh.createCurrentWeekFile();
 
-  vscode.workspace.onDidChangeWorkspaceFolders(() => {
+    vscode.workspace.onDidChangeWorkspaceFolders(() => {
+      workspaceFolderChange(context);
+    });
+
+    // 插件被激活时，执行一次.
     workspaceFolderChange(context);
-  });
+  } catch (error: any) {
+    console.error(error);
 
-  // 插件被激活时，执行一次.
-  workspaceFolderChange(context);
+    vscode.window.showErrorMessage(
+      `Weekhelp: ${error.message || "插件激活时出现异常"}`
+    );
+  }
 }
 
 // This method is called when your extension is deactivated
