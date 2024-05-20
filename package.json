@@ -2,7 +2,7 @@
   "name": "weekhelp",
   "displayName": "Weekhelp",
   "description": "自动收集整理 git 提交信息，为写周报提供素材。",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "repository": "https://github.com/dowithless/weekhelp",
   "publisher": "dowithless",
   "icon": "icon.png",
