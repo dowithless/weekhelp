@@ -167,6 +167,44 @@ export class Weekhelp {
     }
   }
 
+  static moveFile(srcPath: string, destPath: string) {
+    var readStream = fs.createReadStream(srcPath);
+    var writeStream = fs.createWriteStream(destPath);
+
+    readStream.on("error", onError);
+    writeStream.on("error", onError);
+
+    readStream.on("close", function () {
+      Weekhelp.deleteFile(srcPath);
+    });
+
+    readStream.pipe(writeStream);
+
+    function onError(error: any) {
+      readStream.destroy();
+      writeStream.end();
+
+      console.error(error);
+      vscode.window.showErrorMessage(error.message ?? "An error occurred");
+    }
+  }
+
+  /**
+   * 删除指定路径的文件。
+   * @param path 要删除的文件的路径。
+   * 该函数不返回任何内容。
+   */
+  static deleteFile(path: string) {
+    try {
+      // 尝试删除指定路径的文件
+      fs.unlinkSync(path);
+    } catch (error: any) {
+      // 如果删除过程中出现错误，打印错误信息，并在VS Code窗口显示错误消息
+      console.error(error);
+      vscode.window.showErrorMessage(error.message ?? `remove file failed`);
+    }
+  }
+
   /**
    * 将指定路径下的周文件移动到新路径下。
    * 此函数会遍历旧路径下的所有文件，找到符合命名规则（YYYY-MM.md）的文件，并将其移动到新路径下。
@@ -184,8 +222,19 @@ export class Weekhelp {
         const oldFilePath = path.join(oldPath, file); // 拼接旧文件路径
         const newFilePath = path.join(newPath, file); // 拼接新文件路径
 
-        // 使用 renameSync 方法移动文件
-        fs.renameSync(oldFilePath, newFilePath);
+        /**
+         * 尝试将文件从旧路径重命名为新路径。
+         * windows 系统没有内置的 mv、rename 命令
+         * 如果重命名失败，则使用Weekhelp.moveFile方法尝试再次移动文件。
+         *
+         * @param oldFilePath 旧文件路径
+         * @param newFilePath 新文件路径
+         */
+        try {
+          fs.renameSync(oldFilePath, newFilePath); // 尝试同步重命名文件
+        } catch (error) {
+          Weekhelp.moveFile(oldFilePath, newFilePath); // 如果重命名失败，使用备用方法移动文件
+        }
       }
     }
   }
